@@ -1,5 +1,11 @@
 <?php
 
+/** 
+ * METAR - class for parsing METAR messages
+ * 
+ * Licence: MIT 
+ * Author: Jerzy Zawadzki
+ **/
 class METAR {
 
 
