@@ -81,7 +81,7 @@ class METAR {
             $this->setWindSpeedVariable($matches[1]);
             return;
         }
-        if (preg_match('#^([0-9]{4})|([0-9]{1,4})SM$#', $code, $matches)) {
+        if (preg_match('#^ ([0-9]{4})|([0-9]{1,4})SM $#', $code, $matches)) {
 			if  (strlen($matches[2])>0)
 				$this->setVisibility((float)$matches[2]*1609.34);
 			else if ($matches[1] == '9999')
