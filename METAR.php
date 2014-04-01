@@ -33,6 +33,7 @@ class METAR {
         $pos=0;
         if($pieces[0]=='METAR') 
             $pos++;
+        if (strlen($pieces[$pos]) != 4) $pos++; // skip COR and similar
         $this->setLocation($pieces[$pos]);
         $pos++;
         $this->setDayOfMonth($pieces[$pos]{0}.$pieces[$pos]{1});
