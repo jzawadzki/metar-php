@@ -33,13 +33,18 @@ class METAR {
         $pos=0;
         if($pieces[0]=='METAR') 
             $pos++;
+        if (strlen($pieces[$pos]) != 4) $pos++; // skip COR and similar
         $this->setLocation($pieces[$pos]);
         $pos++;
         $this->setDayOfMonth($pieces[$pos]{0}.$pieces[$pos]{1});
         $this->setZuluTime(substr($pieces[$pos],2,4));
         $c=count($pieces);
         for($pos++;$pos<$c;$pos++)
-            $this->checkFormat($pieces[$pos]);
+        {
+            $piece = $pieces[$pos];
+            if ($piece == "RMK") break; // we are not interested in remarks
+            $this->checkFormat($piece);
+        }
 			
     }
 
@@ -55,21 +60,20 @@ class METAR {
             return;
         }
         if (preg_match('#^(M?[0-9]{2,})/(M?[0-9]{2,})$#', $code, $matches)) { //TEMP/DEW TT/DD negative M03
-             $temp = (int) $matches[1];
+             $temp = (float) $matches[1];
             if ($matches[1]{0} == 'M')
-                $temp = ((int) substr($matches[1], 1)) * -1;
+                $temp = ((float) substr($matches[1], 1)) * -1;
               
             $this->setTemperature($temp);
             
-            $dew = (int) $matches[2];
+            $dew = (float)$matches[2];
             if ($matches[2]{0} == 'M')
-                $dew = ((int) substr($matches[2], 1)) * -1;
-                
+                $dew = ((float) substr($matches[2], 1)) * -1;
             $this->setDewPoint($dew);
             return;
         }
         if (preg_match('#^(A|Q)([0-9]{4})$#', $code, $matches)) { //QNH
-            $this->setQNH((int) $matches[2], $matches[1] == 'Q' ? 'hPa' : 'mMHg');
+            $this->setQNH((float) $matches[2], $matches[1] == 'Q' ? 'hPa' : 'inHg');
             return;
         }
 
@@ -82,22 +86,29 @@ class METAR {
             $this->setWindSpeedVariable($matches[1]);
             return;
         }
-        if (preg_match('#^([0-9]{4})$#', $code, $matches)) {
-            if ($matches[1] == '9999')
-                $this->setVisibility('MAX');
+        if (preg_match('#^([0-9]{4})|([0-9]{1,4})SM$#', $code, $matches)) {
+			if  (strlen($matches[2])>0)
+				$this->setVisibility((float)$matches[2]*1609.34);
+			else if ($matches[1] == '9999')
+                $this->setVisibility('> 10000');
             else
-                $this->setVisibility((int) $matches[1]);
+                $this->setVisibility($matches[1]);
             return;
         }
-        if (preg_match('#^(SKC|CLR|FEW|SCT|BKN|OVC|VV)([0-9]{3})$#', $code, $matches)) {
-            $this->addCloudCover($matches[1], ((int) $matches[2]) * 100);
+		else if (preg_match('#^CAVOK$#', $code, $matches)) {
+			$this->setVisibility('> 10000');
+			$this->addWeather("CAVOK");
+		}
+
+        if (preg_match('#^(SKC|CLR|FEW|SCT|BKN|OVC|VV)([0-9]{3})(CB|TCU)?$#', $code, $matches)) {
+            $this->addCloudCover($matches[1], ((float) $matches[2]) * 100, $matches[3]);
             return ;
         }
         if (preg_match('#^(R[A-Z0-9]{2,3})/([0-9]{4})(V([0-9]{4}))?(FT)?$#',$code,$matches)) {
             
-            $range=array('exact'=>(int)$matches[2],'unit'=>$matches[5]?'FT':'M');
+            $range=array('exact'=>(float)$matches[2],'unit'=>$matches[5]?'FT':'M');
             if(isset($matches[3]))
-                $range=Array('from'=>(int)$matches[2],'to'=>(int)$matches[4],'unit'=>$matches[5]?'FT':'M');
+                $range=Array('from'=>(float)$matches[2],'to'=>(float)$matches[4],'unit'=>$matches[5]?'FT':'M');
             $this->addRunwayVisualRange($matches[1],$range);
             return ;
         }
@@ -134,7 +145,7 @@ class METAR {
         $this->weather[]=$weather;
     }
     public function getWeather() {
-        return $this->weather;
+        return $this->weather?$this->weather:array("CLEAR");
     }
     public function addRunwayVisualRange($runway, $range) {
         $this->runways[$runway]=$range;
@@ -143,9 +154,9 @@ class METAR {
         return isset($this->runways[$runway])?$this->runways[$runway]:null;
     
     }
-    public function addCloudCover($type,$level) {
+    public function addCloudCover($type,$level,$significant) {
         
-        $this->cloudCover[]=Array('type'=>$type,'level'=>$level);
+        $this->cloudCover[]=Array('type'=>$type,'level'=>$level, 'significant'=>$significant);
     }
     public function getCloudCover() {
         return $this->cloudCover;
@@ -160,7 +171,7 @@ class METAR {
     }
     
     public function setWindSpeedVariable($val) {
-        $this->windSpeedDirectionVariable=$val;
+        $this->windSpeedDirectionVariable=(float)$val;
         
     }
     public function getWindSpeedVariable() {
@@ -198,23 +209,23 @@ class METAR {
         $this->dewPoint=$val;
     }
     public function getDewPoint() {
-        $this->dewPoint;
+        return $this->dewPoint;
     }
     public function setWindGusts($val) {
-        $this->windGusts=(int)$val;
+        $this->windGusts=(float)$val;
     }
     public function getWindGusts() {
         return $this->windGusts?$this->windGusts:0;
     }
     public function setWindDirection($val) {
-            $this->windDirection=(int)$val;
+            $this->windDirection=(float)$val;
     }
     public function getWindDirection() {
-        return $this->windDirection();
+        return $this->windDirection;
     }
     public function setWindSpeed($speed,$unit) 
     {
-        $speedKT=(int)$speed;
+        $speedKT=(float)$speed;
         if($unit=='MPS')
             $speedKT= 0.00031965819613457*$speedKT;
         $this->windSpeedKT=$speedKT;
