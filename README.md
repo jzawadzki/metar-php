@@ -11,7 +11,8 @@ From Wikipedia, the free encyclopedia
 ## Installation
 
 ```sh
-$ composer require "jzawadzki/metar-php"```
+$ composer require "jzawadzki/metar-php"
+```
 ## Usage
 
 ```php
