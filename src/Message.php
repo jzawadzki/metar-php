@@ -11,12 +11,12 @@ namespace METAR;
 class Message {
 
 
-    private $location,$time,$day;
-    private $auto=false;
-    private $cloudCover=Array();
-    private $runways=Array();
-    private $weather=Array();
-    private $texts=Array('MI'=>'Shallow','PR'=>'Partial','BC'=>'Low drifting','BL'=>'Blowing',
+    protected $location,$time,$day;
+    protected $auto=false;
+    protected $cloudCover=Array();
+    protected $runways=Array();
+    protected $weather=Array();
+    protected $texts=Array('MI'=>'Shallow','PR'=>'Partial','BC'=>'Low drifting','BL'=>'Blowing',
         'SH'=>'Showers','TS'=>'Thunderstorm','FZ'=>'Freezing','DZ'=>'Drizzle','RA'=>'Rain','SN'=>'Snow',
         'SG'=>'Snow Grains','IC'=>'Ice crystals','PL'=>'Ice pellets','GR'=>'Hail','GS'=>'Small hail',
         'UP'=>'Unknown','BR'=>'Mist','FG'=>'Fog','FU'=>'Smoke','VA'=>'Volcanic ash','DU'=>'Widespread dust',
@@ -29,7 +29,7 @@ class Message {
             $this->readFromCode($code);    
 
     }
-    private function readFromCode($code) {
+    protected function readFromCode($code) {
 
         $pieces = explode(' ',$code);
         $pos=0;
@@ -142,21 +142,21 @@ class Message {
             return;
         }
     }
-    public function addWeather($weather) {
+    protected function addWeather($weather) {
         
         $this->weather[]=$weather;
     }
     public function getWeather() {
         return $this->weather?$this->weather:array("CLEAR");
     }
-    public function addRunwayVisualRange($runway, $range) {
+    protected function addRunwayVisualRange($runway, $range) {
         $this->runways[$runway]=$range;
     }
     public function getRunwayVisualRange($runway) {
         return isset($this->runways[$runway])?$this->runways[$runway]:null;
     
     }
-    public function addCloudCover($type,$level,$significant) {
+    protected function addCloudCover($type,$level,$significant) {
         
         $this->cloudCover[]=Array('type'=>$type,'level'=>$level, 'significant'=>$significant);
     }
@@ -164,68 +164,65 @@ class Message {
         return $this->cloudCover;
     
     }
-    public function setVisibility($val) {
+    protected function setVisibility($val) {
         
         $this->visibility=$val;
     }
     public function getVisibility() {
         return $this->visibility;
     }
-    
-    public function setWindSpeedVariable($val) {
+
+    protected function setWindSpeedVariable($val) {
         $this->windSpeedDirectionVariable=(float)$val;
-        
+
     }
     public function getWindSpeedVariable() {
         
         return $this->windSpeedDirectionVariable;
     }
-    public function setWindDirectionVariable($val) {
-        $this->windDirectionVariable=$val;
-    
-    }
+
     public function getWindDirectionVariable() {
         return $this->windDirectionVariable;
     }
-    public function setQNH($val,$unit) {
+    protected function setQNH($val,$unit) {
         if($unit!='hPa'&&$unit!='inHg')
             throw new Exception('Unknown unit for QNH (only hPa or inHg)');
         if($unit=='inHg')
             $this->QNH=$this->translateInHgToHPa($val);
         $this->QNH=$val;
     }
-    private function translateInHgToHPa($val) {
+    protected function translateInHgToHPa($val) {
         
         return round($val/100*33.86389);
     }
     public function getQNH() {
         return $this->QNH;
     }
-    public function setTemperature($val) {
+    protected function setTemperature($val) {
         $this->temperature=$val;
     }
     public function getTemperature() {
         return $this->temperature;
     }
-    public function setDewPoint($val) {
+    protected function setDewPoint($val) {
         $this->dewPoint=$val;
     }
     public function getDewPoint() {
         return $this->dewPoint;
     }
-    public function setWindGusts($val) {
+    protected function setWindGusts($val) {
         $this->windGusts=(float)$val;
     }
     public function getWindGusts() {
         return $this->windGusts?$this->windGusts:0;
     }
-    public function setWindDirection($val) {
+    protected function setWindDirection($val) {
             $this->windDirection=(float)$val;
     }
     public function getWindDirection() {
         return $this->windDirection;
     }
-    public function setWindSpeed($speed,$unit) 
+    protected function setWindSpeed($speed,$unit) 
     {
         $speedKT=(float)$speed;
         if($unit=='MPS')
@@ -236,7 +233,7 @@ class Message {
         return $this->windSpeedKT;
     }
 
-    public function setIsAuto($auto) {
+    protected function setIsAuto($auto) {
         $this->auto=$auto;
     }
     public function isAuto() {
@@ -245,7 +242,7 @@ class Message {
     public function getLocation() {
         return $this->location;
     }
-    public function setLocation($loc) {
+    protected function setLocation($loc) {
         if(strlen($loc)!=4)
             throw new Exception('Invalid location');
         $this->location=$loc;
@@ -253,7 +250,7 @@ class Message {
     public function getDayOfMonth() {
         return $this->day;
     }
-    public function setDayOfMonth($day) {
+    protected function setDayOfMonth($day) {
         if($day<1||$day>31)
             throw new Exception('Invalid day of month');
         $this->day=$day;
@@ -261,7 +258,7 @@ class Message {
     public function getZuluTime() {
         return $this->time;
     }
-    public function setZuluTime($time) {
+    protected function setZuluTime($time) {
         $this->time=$time;
     }
 

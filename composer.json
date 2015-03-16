@@ -1,4 +1,5 @@
 {
+    "name": "jzawadzki/metar-php",
     "autoload": {
         "psr-4": {"METAR\\": "src/"}
     }
