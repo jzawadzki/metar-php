@@ -1,5 +1,12 @@
 {
     "name": "jzawadzki/metar-php",
+    "licence": "MIT",
+    "authors": [
+        {
+            "name": "Jerzy Zawadzki",
+            "email": "zawadzki.jerzy@gmail.com"
+        }
+    ],
     "autoload": {
         "psr-4": {"METAR\\": "src/"}
     }
