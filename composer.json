@@ -1,7 +1,7 @@
 {
     "name": "jzawadzki/metar-php",
-    "licence": "MIT",
-    "description": "lightweight library to decode METAR messages",
+    "license": "MIT",
+    "description": "lightweight library for decoding METAR messages",
     "authors": [
         {
             "name": "Jerzy Zawadzki",
