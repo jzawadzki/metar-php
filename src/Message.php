@@ -103,7 +103,7 @@ class Message
         )
         ) { //WEATHER dddssKT or dddssGggKT
             $this->wind->setDirection($matches[1]);
-            $this->setWindSpeed($matches[2], $matches[5]);
+            $this->wind->setSpeed($matches[2], $matches[5]);
             if ($matches[3]) {
                 $this->setWindGusts($matches[4]);
             }
@@ -329,18 +329,9 @@ class Message
         return $this->wind->getDirection();
     }
 
-    protected function setWindSpeed($speed, $unit)
-    {
-        $speedKT = (float)$speed;
-        if ($unit == 'MPS') {
-            $speedKT = 0.00031965819613457 * $speedKT;
-        }
-        $this->windSpeedKT = $speedKT;
-    }
-
     public function getWindSpeed()
     {
-        return $this->windSpeedKT;
+        return $this->wind->getSpeed();
     }
 
     protected function setIsAuto($auto)
