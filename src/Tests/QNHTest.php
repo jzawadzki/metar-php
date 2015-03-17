@@ -2,7 +2,7 @@
 
 namespace METAR\Tests;
 
-use METAR\Unit\QNH;
+use METAR\Part\QNH;
 
 class QNHTest extends \PHPUnit_Framework_TestCase {
 

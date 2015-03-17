@@ -2,7 +2,8 @@
 
 namespace METAR;
 
-use METAR\Unit\QNH;
+use METAR\Part\QNH;
+use METAR\Part\Wind;
 
 /**
  * METAR - class for parsing METAR messages
@@ -19,6 +20,10 @@ class Message
     protected $runways = Array();
     protected $weather = Array();
     protected $QNH;
+    /**
+     * @var Wind
+     */
+    protected $wind;
     protected $texts = Array(
         'MI' => 'Shallow',
         'PR' => 'Partial',
@@ -66,6 +71,7 @@ class Message
         if ($pieces[0] == 'METAR') {
             $pos++;
         }
+        $this->wind = new Wind();
         if (strlen($pieces[$pos]) != 4) {
             $pos++;
         } // skip COR and similar
@@ -96,7 +102,7 @@ class Message
             $matches
         )
         ) { //WEATHER dddssKT or dddssGggKT
-            $this->setWindDirection($matches[1]);
+            $this->wind->setDirection($matches[1]);
             $this->setWindSpeed($matches[2], $matches[5]);
             if ($matches[3]) {
                 $this->setWindGusts($matches[4]);
@@ -121,7 +127,7 @@ class Message
         }
 
         if (preg_match('#^(A|Q)([0-9]{4})$#', $code, $matches)) { //QNH
-            $this->QNH = new QNH((float)$matches[2], $matches[1] == 'Q' ? 'hPa' : 'inHg');
+            $this->QNH = new QNH($matches[2], $matches[1] == 'Q' ? 'hPa' : 'inHg');
             return;
         }
 
@@ -136,6 +142,7 @@ class Message
         }
         if (preg_match('#^([0-9]{4})|(([0-9]{1,4})SM)$#', $code, $matches)) {
             if (isset($matces[3]) && strlen($matches[3]) > 0) {
+
                 $this->setVisibility((float)$matches[3] * 1609.34);
             } else {
                 if ($matches[1] == '9999') {
@@ -319,7 +326,7 @@ class Message
 
     public function getWindDirection()
     {
-        return $this->windDirection;
+        return $this->wind->getDirection();
     }
 
     protected function setWindSpeed($speed, $unit)

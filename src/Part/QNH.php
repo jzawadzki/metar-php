@@ -1,6 +1,6 @@
 <?php
 
-namespace METAR\Unit;
+namespace METAR\Part;
 
 class QNH
 {
@@ -13,7 +13,7 @@ class QNH
             $this->value = (int)$value;
         }
         elseif ($unit == 'inHg') {
-            $this->value = $this->translateInHgToHPa($this->value);
+            $this->value = $this->translateInHgToHPa((float)$this->value);
         }
         else {
             throw new \Exception('Unknown unit for QNH (only hPa or inHg)');
