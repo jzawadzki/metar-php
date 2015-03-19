@@ -25,7 +25,7 @@ class Text
 METAR: %s
 
 Location: %s
-Day of month: %s Hour: %sZ
+Day of month: %s Time: %sZ
 
 Temperature: %.1fC Dew point: %.1fC
 QNH: %d hPa (%.2f inHg)
