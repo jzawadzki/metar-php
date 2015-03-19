@@ -1,6 +1,6 @@
 <?php
 
-namespace METAR\Tests;
+namespace METAR\Tests\Part;
 
 use METAR\Part\QNH;
 
