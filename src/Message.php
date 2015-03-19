@@ -15,7 +15,7 @@ use METAR\Part\Wind;
 class Message
 {
 
-    protected $location, $time, $day;
+    protected $code,$location, $time, $day;
     protected $auto = false;
     protected $cloudCover = Array();
     protected $runways = Array();
@@ -57,11 +57,15 @@ class Message
         'DS' => 'Duststorm'
     );
 
-    public function __construct($code = '')
+    public function __construct($code)
     {
-        if ($code) {
-            $this->readFromCode($code);
-        }
+        $this->code = $code;
+        $this->readFromCode($code);
+    }
+
+    public function getAsText()
+    {
+        return $this->code;
     }
 
     protected function readFromCode($code)
