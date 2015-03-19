@@ -3,6 +3,7 @@
 namespace METAR;
 
 use METAR\Part\QNH;
+use METAR\part\Temperature;
 use METAR\Part\Wind;
 
 /**
@@ -116,13 +117,13 @@ class Message
                 $temp = ((float)substr($matches[1], 1)) * -1;
             }
 
-            $this->setTemperature($temp);
+            $this->setTemperature(new Temperature($temp));
 
             $dew = (float)$matches[2];
             if ($matches[2]{0} == 'M') {
                 $dew = ((float)substr($matches[2], 1)) * -1;
             }
-            $this->setDewPoint($dew);
+            $this->setDewPoint(new Temperature($dew));
             return;
         }
 
@@ -278,7 +279,7 @@ class Message
 
     protected function setQNH($val, $unit)
     {
-        $this->QNH = new QNH($val, $Unit);
+        $this->QNH = new QNH($val, $unit);
     }
 
     /**
@@ -294,6 +295,9 @@ class Message
         $this->temperature = $val;
     }
 
+    /**
+     * @return Temperature
+     */
     public function getTemperature()
     {
         return $this->temperature;
@@ -304,6 +308,9 @@ class Message
         $this->dewPoint = $val;
     }
 
+    /**
+     * @return Temperature
+     */
     public function getDewPoint()
     {
         return $this->dewPoint;

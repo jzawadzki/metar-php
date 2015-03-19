@@ -25,8 +25,8 @@ class MessageTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(Array(
             Array('type'=>'BKN','level'=>6000,'significant'=>'')
         ),$metar->getCloudCover());
-        $this->assertEquals(4,$metar->getTemperature());
-        $this->assertEquals(3,$metar->getDewPoint());
+        $this->assertEquals(4,$metar->getTemperature()->toUnit('C'));
+        $this->assertEquals(3,$metar->getDewPoint()->toUnit('C'));
         $this->assertEquals(8000,$metar->getVisibility());
         $this->assertEquals("1034",(string)$metar->getQNH());
         $this->assertEquals("1034",(string)$metar->getQNH()->toHPa());
@@ -38,7 +38,8 @@ class MessageTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(15, $metar->getDayOfMonth());
         $this->assertEquals(2351,$metar->getZuluTime());
         $this->assertEquals(330, $metar->getWindDirection());
-
+        $this->assertEquals(5, $metar->getTemperature()->toUnit('C'));
+        $this->assertEquals(-4, $metar->getDewPoint()->toUnit('C'));
     }
 
 }
