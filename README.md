@@ -17,13 +17,14 @@ $ composer require "jzawadzki/metar-php"
 
 ```php
 
-$metar = new \METAR\Message("EPKK 160030Z 06010KT 8000 BKN060 04/03 Q1034");
+$metar = new \METAR\Message("EPKK 160030Z 06010KT 8000 BKN060 04/M03 Q1034");
 
 echo $metar->getLocation(); //EPKK
 echo $metar->getVisibility(); //8000
-echo $metar->getQHN()->toHPa(); //1034
-echo $metar->getQHN()->toInHg(); //29.91
-
+echo $metar->getQNH()->toHPa(); //1034
+echo $metar->getQNH()->toInHg(); //30.53
+echo $metar->getTemperature()->toUnit('C'); //4
+echo $metar->getDewPoint()->toUnit('F'); //26.6
 ```
 
 ## License
