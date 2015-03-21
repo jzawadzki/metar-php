@@ -22,7 +22,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(16,$metar->getDayOfMonth());
         $this->assertEquals('0030',$metar->getZuluTime());
         $this->assertEquals(60,$metar->getWindDirection());
-        $this->assertEquals(10,$metar->getWindSpeed());
+        $this->assertEquals(10,$metar->getWindSpeed()->toUnit('kt'));
         $this->assertEquals(Array(
             Array('type'=>'BKN','level'=>6000,'significant'=>'')
         ),$metar->getCloudCover());

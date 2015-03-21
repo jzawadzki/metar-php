@@ -5,6 +5,7 @@ namespace METAR;
 use METAR\Part\QNH;
 use METAR\part\Temperature;
 use METAR\Part\Wind;
+use METAR\Unit\Speed;
 
 /**
  * METAR - class for parsing METAR messages
@@ -108,9 +109,10 @@ class Message
         )
         ) { //WEATHER dddssKT or dddssGggKT
             $this->wind->setDirection($matches[1]);
+
             $this->wind->setSpeed($matches[2], $matches[5]);
             if ($matches[3]) {
-                $this->setWindGusts($matches[4]);
+                $this->setWindGusts($matches[4],$matches[5]);
             }
             return;
         }
@@ -320,14 +322,14 @@ class Message
         return $this->dewPoint;
     }
 
-    protected function setWindGusts($val)
+    protected function setWindGusts($val,$unit)
     {
-        $this->windGusts = (float)$val;
+        $this->wind->setGusts(new Speed($val,$unit=='KT'?'kt':'m/s'));
     }
 
     public function getWindGusts()
     {
-        return $this->windGusts ? $this->windGusts : 0;
+        return $this->wind->getGusts();
     }
 
     protected function setWindDirection($val)
