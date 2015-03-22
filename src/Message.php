@@ -16,7 +16,7 @@ use METAR\Unit\Speed;
 class Message
 {
 
-    protected $code,$location, $time, $day;
+    protected $code, $location, $time, $day;
     protected $auto = false;
     protected $cloudCover = Array();
     protected $runways = Array();
@@ -96,12 +96,8 @@ class Message
 
     }
 
-    public function checkFormat($code)
+    protected function checkForWindSpeed($code)
     {
-        $matches = Array();
-        if ($code == 'AUTO') {
-            $this->setIsAuto(true);
-        }
         if (preg_match(
             '#^([0-9]{3})([0-9]{2})(G([0-9]{2}))?(KT|MPS)$#',
             $code,
@@ -112,29 +108,56 @@ class Message
 
             $this->wind->setSpeed($matches[2], $matches[5]);
             if ($matches[3]) {
-                $this->setWindGusts($matches[4],$matches[5]);
+                $this->setWindGusts($matches[4], $matches[5]);
             }
-            return;
+            return true;
+        }
+        return false;
+    }
+
+    protected function checkForTemperature($code)
+    {
+        if (!preg_match('#^(M?[0-9]{2,})/(M?[0-9]{2,})$#', $code, $matches)) { //TEMP/DEW TT/DD negative M03
+            return false;
+        }
+        $temp = (float)$matches[1];
+        if ($matches[1]{0} == 'M') {
+            $temp = ((float)substr($matches[1], 1)) * -1;
         }
 
-        if (preg_match('#^(M?[0-9]{2,})/(M?[0-9]{2,})$#', $code, $matches)) { //TEMP/DEW TT/DD negative M03
-            $temp = (float)$matches[1];
-            if ($matches[1]{0} == 'M') {
-                $temp = ((float)substr($matches[1], 1)) * -1;
-            }
+        $this->setTemperature(new Temperature($temp));
 
-            $this->setTemperature(new Temperature($temp));
-
-            $dew = (float)$matches[2];
-            if ($matches[2]{0} == 'M') {
-                $dew = ((float)substr($matches[2], 1)) * -1;
-            }
-            $this->setDewPoint(new Temperature($dew));
-            return;
+        $dew = (float)$matches[2];
+        if ($matches[2]{0} == 'M') {
+            $dew = ((float)substr($matches[2], 1)) * -1;
         }
+        $this->setDewPoint(new Temperature($dew));
 
+        return true;
+    }
+
+    protected function checkForQNH($code)
+    {
         if (preg_match('#^(A|Q)([0-9]{4})$#', $code, $matches)) { //QNH
             $this->QNH = new QNH($matches[2], $matches[1] == 'Q' ? 'hPa' : 'inHg');
+            return;
+        }
+    }
+
+    protected function checkFormat($code)
+    {
+        $matches = Array();
+        if ($code == 'AUTO') {
+            $this->setIsAuto(true);
+        }
+        if ($this->checkForWindSpeed($code)) {
+            return;
+        }
+
+        if ($this->checkForTemperature($code)) {
+            return;
+        }
+        if ($this->checkForQNH($code)) {
             return;
         }
 
@@ -322,9 +345,9 @@ class Message
         return $this->dewPoint;
     }
 
-    protected function setWindGusts($val,$unit)
+    protected function setWindGusts($val, $unit)
     {
-        $this->wind->setGusts(new Speed($val,$unit=='KT'?'kt':'m/s'));
+        $this->wind->setGusts(new Speed($val, $unit == 'KT' ? 'kt' : 'm/s'));
     }
 
     public function getWindGusts()
