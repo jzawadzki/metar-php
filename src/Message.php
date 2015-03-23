@@ -140,10 +140,18 @@ class Message
     {
         if (preg_match('#^(A|Q)([0-9]{4})$#', $code, $matches)) { //QNH
             $this->QNH = new QNH($matches[2], $matches[1] == 'Q' ? 'hPa' : 'inHg');
-            return;
-        }
-    }
+            return true;
 
+        }
+        return false;
+    }
+    protected function checkForWindDirection($code) {
+        if (preg_match('#^([0-9]{3})V([0-9]{3})$#', $code, $matches)) {
+            $this->setWindDirectionVariable(Array($matches[1], $matches[2]));
+            return true;
+        }
+        return false;
+    }
     protected function checkFormat($code)
     {
         $matches = Array();
@@ -161,9 +169,8 @@ class Message
             return;
         }
 
-        if (preg_match('#^([0-9]{3})V([0-9]{3})$#', $code, $matches)) {
-            $this->setWindDirectionVariable(Array($matches[1], $matches[2]));
-            return;
+        if($this->checkForWindDirection($code)) {
+            return ;
         }
         if (preg_match('#^VRB([0-9]{2})KT$#', $code, $matches)) {
 
