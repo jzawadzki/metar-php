@@ -60,7 +60,9 @@ class Message
 
     public function __construct($code)
     {
-        $this->code = $code;
+        $this->code          = $code;
+        $codes               = implode('|', array_keys($this->texts));
+        $this->regExpWeather = '#^(\+|\-|VC)?(' . $codes . ')(' . $codes . ')?$#';
         $this->readFromCode($code);
     }
 
@@ -88,31 +90,26 @@ class Message
         $c = count($pieces);
         for ($pos++; $pos < $c; $pos++) {
             $piece = $pieces[$pos];
-            if ($piece == "RMK") {
+            if ($piece == "RMK") {  // we are not interested in remarks
                 break;
-            } // we are not interested in remarks
+            }
             $this->checkFormat($piece);
         }
-
     }
 
     protected function checkForWindSpeed($code)
     {
-        if (preg_match(
-            '#^([0-9]{3})([0-9]{2})(G([0-9]{2}))?(KT|MPS)$#',
-            $code,
-            $matches
-        )
-        ) { //WEATHER dddssKT or dddssGggKT
-            $this->wind->setDirection($matches[1]);
-
-            $this->wind->setSpeed($matches[2], $matches[5]);
-            if ($matches[3]) {
-                $this->setWindGusts($matches[4], $matches[5]);
-            }
-            return true;
+        //WEATHER dddssKT or dddssGggKT
+        if (!preg_match('#^([0-9]{3})([0-9]{2})(G([0-9]{2}))?(KT|MPS)$#', $code, $matches)) {
+            return false;
         }
-        return false;
+        $this->wind->setDirection($matches[1]);
+
+        $this->wind->setSpeed($matches[2], $matches[5]);
+        if ($matches[3]) {
+            $this->setWindGusts($matches[4], $matches[5]);
+        }
+        return true;
     }
 
     protected function checkForTemperature($code)
@@ -138,45 +135,33 @@ class Message
 
     protected function checkForQNH($code)
     {
-        if (preg_match('#^(A|Q)([0-9]{4})$#', $code, $matches)) { //QNH
-            $this->QNH = new QNH($matches[2], $matches[1] == 'Q' ? 'hPa' : 'inHg');
-            return true;
+        if (!preg_match('#^(A|Q)([0-9]{4})$#', $code, $matches)) { //QNH
+            return false;
+        }
+        $this->QNH = new QNH($matches[1] == 'Q' ? $matches[2] : ($matches[2] / 100), $matches[1] == 'Q' ? 'hPa' : 'inHg');
+        return true;
+    }
 
-        }
-        return false;
-    }
-    protected function checkForWindDirection($code) {
-        if (preg_match('#^([0-9]{3})V([0-9]{3})$#', $code, $matches)) {
-            $this->setWindDirectionVariable(Array($matches[1], $matches[2]));
-            return true;
-        }
-        return false;
-    }
-    protected function checkFormat($code)
+    protected function checkForWindDirection($code)
     {
-        $matches = Array();
-        if ($code == 'AUTO') {
-            $this->setIsAuto(true);
+        if (!preg_match('#^([0-9]{3})V([0-9]{3})$#', $code, $matches)) {
+            return false;
         }
-        if ($this->checkForWindSpeed($code)) {
-            return;
-        }
+        $this->setWindDirectionVariable(Array($matches[1], $matches[2]));
+        return true;
+    }
 
-        if ($this->checkForTemperature($code)) {
-            return;
+    protected function checkForWindSpeedVariable($code)
+    {
+        if (!preg_match('#^VRB([0-9]{2})KT$#', $code, $matches)) {
+            return false;
         }
-        if ($this->checkForQNH($code)) {
-            return;
-        }
+        $this->setWindSpeedVariable($matches[1]);
+        return true;
+    }
 
-        if($this->checkForWindDirection($code)) {
-            return ;
-        }
-        if (preg_match('#^VRB([0-9]{2})KT$#', $code, $matches)) {
-
-            $this->setWindSpeedVariable($matches[1]);
-            return;
-        }
+    protected function checkForVisibility($code)
+    {
         if (preg_match('#^([0-9]{4})|(([0-9]{1,4})SM)$#', $code, $matches)) {
             if (isset($matces[3]) && strlen($matches[3]) > 0) {
 
@@ -188,72 +173,120 @@ class Message
                     $this->setVisibility($matches[1]);
                 }
             }
-            return;
-        } else {
-            if (preg_match('#^CAVOK$#', $code, $matches)) {
-                $this->setVisibility('> 10000');
-                $this->addWeather("CAVOK");
-            }
+            return true;
         }
 
-        if (preg_match('#^(SKC|CLR|FEW|SCT|BKN|OVC|VV)([0-9]{3})(CB|TCU|CU|CI)?$#', $code, $matches)) {
-            $this->addCloudCover($matches[1], ((float)$matches[2]) * 100, isset($matches[3]) ? $matches[3] : '');
+        if (preg_match('#^CAVOK$#', $code, $matches)) {
+            $this->setVisibility('> 10000');
+            $this->addWeather("CAVOK");
+            return true;
+        }
+        return false;
+    }
+
+    protected function checkForCloudCoverage($code)
+    {
+        if (!preg_match('#^(SKC|CLR|FEW|SCT|BKN|OVC|VV)([0-9]{3})(CB|TCU|CU|CI)?$#', $code, $matches)) {
+            return false;
+        }
+        $this->addCloudCover($matches[1], ((float)$matches[2]) * 100, isset($matches[3]) ? $matches[3] : '');
+        return true;
+
+    }
+
+    protected function checkForRVR($code)
+    {
+        if (!preg_match('#^(R[A-Z0-9]{2,3})/([0-9]{4})(V([0-9]{4}))?(FT)?$#', $code, $matches)) {
+            return false;
+        }
+
+        $range = array('exact' => (float)$matches[2], 'unit' => $matches[5] ? 'FT' : 'M');
+        if (isset($matches[3])) {
+            $range = Array(
+                'from' => (float)$matches[2],
+                'to'   => (float)$matches[4],
+                'unit' => $matches[5] ? 'FT' : 'M'
+            );
+        }
+        $this->addRunwayVisualRange($matches[1], $range);
+        return true;
+    }
+
+    protected function checkForWeather($code)
+    {
+        if (!preg_match($this->regExpWeather, $code, $matches)) {
+            return false;
+        }
+        $text = Array();
+        switch ($matches[1]) {
+            case '+':
+                $text[] = 'Heavy';
+                break;
+            case '-':
+                $text[] = 'Light';
+                break;
+            case 'VC':
+                $text[] = 'Vicinity';
+                break;
+            default:
+                break;
+        }
+        if (isset($matches[2])) {
+            $text[] = $this->texts[$matches[2]];
+        }
+        if (isset($matches[3])) {
+            $text[] = $this->texts[$matches[3]];
+        }
+        $this->addWeather(implode(' ', $text));
+        return true;
+    }
+
+    protected function checkForAutoRemark($code)
+    {
+        if ($code == 'AUTO') {
+            $this->setIsAuto(true);
+            return true;
+        }
+        return false;
+    }
+
+    protected function checkFormat($code)
+    {
+
+        if ($this->checkForAutoRemark($code)) {
             return;
         }
-        if (preg_match('#^(R[A-Z0-9]{2,3})/([0-9]{4})(V([0-9]{4}))?(FT)?$#', $code, $matches)) {
-
-            $range = array('exact' => (float)$matches[2], 'unit' => $matches[5] ? 'FT' : 'M');
-            if (isset($matches[3])) {
-                $range = Array(
-                    'from' => (float)$matches[2],
-                    'to'   => (float)$matches[4],
-                    'unit' => $matches[5] ? 'FT' : 'M'
-                );
-            }
-            $this->addRunwayVisualRange($matches[1], $range);
+        if ($this->checkForWindSpeed($code)) {
             return;
         }
-
-        if (preg_match(
-            '#^(\+|\-|VC)?(' . implode('|', array_keys($this->texts)) . ')(' . implode(
-                '|',
-                array_keys($this->texts)
-            ) . ')?$#',
-            $code,
-            $matches
-        )
-        ) {
-            $text = Array();
-            switch ($matches[1]) {
-                case '+':
-                    $text[] = 'Heavy';
-                    break;
-                case '-':
-                    $text[] = 'Light';
-                    break;
-                case 'VC':
-                    $text[] = 'Vicinity';
-                    break;
-                default:
-
-                    break;
-
-            }
-
-            if ($matches[2]) {
-                $text[] = $this->texts[$matches[2]];
-            }
-            if ($matches[3]) {
-                $text[] = $this->texts[$matches[3]];
-            }
-            $this->addWeather(implode(' ', $text));
+        if ($this->checkForTemperature($code)) {
+            return;
+        }
+        if ($this->checkForQNH($code)) {
+            return;
+        }
+        if ($this->checkForWindDirection($code)) {
+            return;
+        }
+        if ($this->checkForWindSpeedVariable($code)) {
+            return;
+        }
+        if ($this->checkForVisibility($code)) {
+            return;
+        }
+        if ($this->checkForCloudCoverage($code)) {
+            return;
+        }
+        if ($this->checkForRVR($code)) {
+            return;
+        }
+        if ($this->checkForWeather($code)) {
             return;
         }
     }
 
     protected function addWeather($weather)
     {
-
         $this->weather[] = $weather;
     }
 
@@ -270,7 +303,6 @@ class Message
     public function getRunwayVisualRange($runway)
     {
         return isset($this->runways[$runway]) ? $this->runways[$runway] : null;
-
     }
 
     protected function addCloudCover($type, $level, $significant)

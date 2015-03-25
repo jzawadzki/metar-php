@@ -9,11 +9,12 @@ class QNH
 
     public function __construct($value, $unit = 'hPa')
     {
+
         if ($unit == 'hPa') {
             $this->value = (int)$value;
         }
         elseif ($unit == 'inHg') {
-            $this->value = $this->translateInHgToHPa((float)$this->value);
+            $this->value = $this->translateInHgToHPa((float)$value);
         }
         else {
             throw new \Exception('Unknown unit for QNH (only hPa or inHg)');
@@ -22,7 +23,7 @@ class QNH
 
     protected function translateInHgToHPa($val)
     {
-        return round($val / 100 * 33.86389);
+        return round($val * 33.86389,2);
     }
 
     protected function translateHPaToInHg($val)

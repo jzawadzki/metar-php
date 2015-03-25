@@ -31,6 +31,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(8000,$metar->getVisibility());
         $this->assertEquals("1034",(string)$metar->getQNH());
         $this->assertEquals("1034",(string)$metar->getQNH()->toHPa());
+
     }
 
     public function testKJFK() {
@@ -41,6 +42,26 @@ class MessageTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(330, $metar->getWindDirection());
         $this->assertEquals(5, $metar->getTemperature()->toUnit('C'));
         $this->assertEquals(-4, $metar->getDewPoint()->toUnit('C'));
+        $this->assertEquals(29.90,$metar->getQNH()->toUnit('inHg'));
+
+    }
+
+    public function testEPMO() {
+        $metar = new METAR("EPMO 170930Z 03006KT 1200 R08/1400D -DZ BR BKN003 OVC036 12/12 Q1009");
+        $this->assertEquals("EPMO",$metar->getLocation());
+        $this->assertEquals(17, $metar->getDayOfMonth());
+        $this->assertEquals("0930",$metar->getZuluTime());
+        $this->assertEquals("030", $metar->getWindDirection());
+        $this->assertEquals(6, $metar->getWindSpeed()->toUnit('kt'));
+        $this->assertEquals(12, $metar->getTemperature()->toUnit('C'));
+        $this->assertEquals(12, $metar->getDewPoint()->toUnit('C'));
+        $this->assertEquals(1200, $metar->getVisibility());
+        $this->assertEquals(Array(
+                Array('type'=>'BKN','level'=>300,'significant'=>''),
+                Array('type'=>'OVC','level'=>3600,'significant'=>'')
+            ),$metar->getCloudCover());
+        $this->assertEquals(Array(0=>'Light Drizzle',1=>'Mist'),$metar->getWeather());
+        $this->assertEquals(1009,$metar->getQNH()->toUnit('hPa'));
     }
 
 }
