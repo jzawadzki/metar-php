@@ -3,7 +3,7 @@
 namespace METAR;
 
 use METAR\Part\QNH;
-use METAR\part\Temperature;
+use METAR\Part\Temperature;
 use METAR\Part\Wind;
 use METAR\Unit\Speed;
 
@@ -16,17 +16,17 @@ use METAR\Unit\Speed;
 class Message
 {
 
-    private $code, $location, $time, $day;
-    private $auto = false;
-    private $cloudCover = Array();
-    private $runways = Array();
-    private $weather = Array();
-    private $QNH, $dewPoint, $temperature;
+    protected $code, $location, $time, $day;
+    protected $auto = false;
+    protected $cloudCover = Array();
+    protected $runways = Array();
+    protected $weather = Array();
+    protected $QNH, $dewPoint, $temperature;
     /**
      * @var Wind
      */
-    private $wind;
-    private $texts = Array(
+    protected $wind;
+    protected $texts = Array(
         'MI' => 'Shallow',
         'PR' => 'Partial',
         'BC' => 'Low drifting',
@@ -71,7 +71,7 @@ class Message
         return $this->code;
     }
 
-    private function readFromCode($code)
+    protected function readFromCode($code)
     {
 
         $pieces = explode(' ', $code);
@@ -97,7 +97,7 @@ class Message
         }
     }
 
-    private function checkForWindSpeed($code)
+    protected function checkForWindSpeed($code)
     {
         //WEATHER dddssKT or dddssGggKT
         if (!preg_match('#^([0-9]{3})([0-9]{2})(G([0-9]{2}))?(KT|MPS)$#', $code, $matches)) {
@@ -111,7 +111,7 @@ class Message
         return true;
     }
 
-    private function checkForTemperature($code)
+    protected function checkForTemperature($code)
     {
         if (!preg_match('#^(M?[0-9]{2,})/(M?[0-9]{2,})$#', $code, $matches)) { //TEMP/DEW TT/DD negative M03
             return false;
@@ -132,7 +132,7 @@ class Message
         return true;
     }
 
-    private function checkForQNH($code)
+    protected function checkForQNH($code)
     {
         if (!preg_match('#^(A|Q)([0-9]{4})$#', $code, $matches)) { //QNH
             return false;
@@ -141,7 +141,7 @@ class Message
         return true;
     }
 
-    private function checkForWindDirection($code)
+    protected function checkForWindDirection($code)
     {
         if (!preg_match('#^([0-9]{3})V([0-9]{3})$#', $code, $matches)) {
             return false;
@@ -150,7 +150,7 @@ class Message
         return true;
     }
 
-    private function checkForWindSpeedVariable($code)
+    protected function checkForWindSpeedVariable($code)
     {
         if (!preg_match('#^VRB([0-9]{2})KT$#', $code, $matches)) {
             return false;
@@ -159,7 +159,7 @@ class Message
         return true;
     }
 
-    private function checkForVisibility($code)
+    protected function checkForVisibility($code)
     {
         if (preg_match('#^([0-9]{4})|(([0-9]{1,4})SM)$#', $code, $matches)) {
             if (isset($matces[3]) && strlen($matches[3]) > 0) {
@@ -183,7 +183,7 @@ class Message
         return false;
     }
 
-    private function checkForCloudCoverage($code)
+    protected function checkForCloudCoverage($code)
     {
         if (!preg_match('#^(SKC|CLR|FEW|SCT|BKN|OVC|VV)([0-9]{3})(CB|TCU|CU|CI)?$#', $code, $matches)) {
             return false;
@@ -193,7 +193,7 @@ class Message
 
     }
 
-    private function checkForRVR($code)
+    protected function checkForRVR($code)
     {
         if (!preg_match('#^(R[A-Z0-9]{2,3})/([0-9]{4})(V([0-9]{4}))?(FT)?$#', $code, $matches)) {
             return false;
@@ -211,7 +211,7 @@ class Message
         return true;
     }
 
-    private function checkForWeather($code)
+    protected function checkForWeather($code)
     {
         if (!preg_match($this->regExpWeather, $code, $matches)) {
             return false;
@@ -240,7 +240,7 @@ class Message
         return true;
     }
 
-    private function checkForAutoRemark($code)
+    protected function checkForAutoRemark($code)
     {
         if ($code == 'AUTO') {
             $this->setIsAuto(true);
@@ -249,7 +249,7 @@ class Message
         return false;
     }
 
-    private function checkFormat($code)
+    protected function checkFormat($code)
     {
 
         if ($this->checkForAutoRemark($code)) {
@@ -284,7 +284,7 @@ class Message
         }
     }
 
-    private function addWeather($weather)
+    protected function addWeather($weather)
     {
         $this->weather[] = $weather;
     }
@@ -294,7 +294,7 @@ class Message
         return $this->weather ? $this->weather : array("CLEAR");
     }
 
-    private function addRunwayVisualRange($runway, $range)
+    protected function addRunwayVisualRange($runway, $range)
     {
         $this->runways[$runway] = $range;
     }
@@ -304,7 +304,7 @@ class Message
         return isset($this->runways[$runway]) ? $this->runways[$runway] : null;
     }
 
-    private function addCloudCover($type, $level, $significant)
+    protected function addCloudCover($type, $level, $significant)
     {
         $this->cloudCover[] = Array('type' => $type, 'level' => $level, 'significant' => $significant);
     }
@@ -314,7 +314,7 @@ class Message
         return $this->cloudCover;
     }
 
-    private function setVisibility($val)
+    protected function setVisibility($val)
     {
         $this->visibility = $val;
     }
@@ -324,7 +324,7 @@ class Message
         return $this->visibility;
     }
 
-    private function setWindSpeedVariable($val)
+    protected function setWindSpeedVariable($val)
     {
         $this->windSpeedDirectionVariable = (float)$val;
     }
@@ -383,7 +383,7 @@ class Message
         return $this->wind->getSpeed();
     }
 
-    private function setIsAuto($auto)
+    protected function setIsAuto($auto)
     {
         $this->auto = $auto;
     }
@@ -398,7 +398,7 @@ class Message
         return $this->location;
     }
 
-    private function setLocation($loc)
+    protected function setLocation($loc)
     {
         if (strlen($loc) != 4) {
             throw new Exception('Invalid location');
@@ -411,7 +411,7 @@ class Message
         return $this->day;
     }
 
-    private function setDayOfMonth($day)
+    protected function setDayOfMonth($day)
     {
         if ($day < 1 || $day > 31) {
             throw new Exception('Invalid day of month');
@@ -424,7 +424,7 @@ class Message
         return $this->time;
     }
 
-    private function setZuluTime($time)
+    protected function setZuluTime($time)
     {
         $this->time = $time;
     }
