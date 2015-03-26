@@ -18,10 +18,22 @@ Location: EPKK
 Day of month: 16 Time: 0030Z
 
 Temperature: 4.0C Dew point: -3.0C
+
 QNH: 1034 hPa (30.53 inHg)
+
+Wind:
+Direction: 060
+Speed: 10kt
+
+Visibility: 8000
+Clouds:
+- BKN at 6000ft
+
+Weather:
+- CLEAR
 TEMPLATE;
 
-        $this->assertEquals($template,$view->render());
+        $this->assertEquals(str_replace("\r","",trim($template)),str_replace("\r","",trim($view->render())));
 
     }
 
