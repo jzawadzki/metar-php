@@ -60,9 +60,7 @@ class Message
 
     public function __construct($code)
     {
-        $this->code          = $code;
-        $codes               = implode('|', array_keys($this->texts));
-        $this->regExpWeather = '#^(\+|\-|VC)?(' . $codes . ')(' . $codes . ')?$#';
+        $this->code  = $code;
         $this->readFromCode($code);
     }
 
@@ -73,6 +71,8 @@ class Message
 
     protected function readFromCode($code)
     {
+        $codes               = implode('|', array_keys($this->texts));
+        $this->regExpWeather = '#^(\+|\-|VC)?(' . $codes . ')(' . $codes . ')?$#';
 
         $pieces = explode(' ', $code);
         $pos    = 0;
@@ -401,7 +401,7 @@ class Message
     protected function setLocation($loc)
     {
         if (strlen($loc) != 4) {
-            throw new Exception('Invalid location');
+            throw new \Exception('Invalid location');
         }
         $this->location = $loc;
     }
@@ -414,7 +414,7 @@ class Message
     protected function setDayOfMonth($day)
     {
         if ($day < 1 || $day > 31) {
-            throw new Exception('Invalid day of month');
+            throw new \Exception('Invalid day of month');
         }
         $this->day = $day;
     }
