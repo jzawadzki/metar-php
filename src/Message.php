@@ -21,7 +21,7 @@ class Message
     protected $cloudCover = Array();
     protected $runways = Array();
     protected $weather = Array();
-    protected $QNH, $dewPoint, $temperature;
+    protected $QNH, $dewPoint, $temperature, $regExpWeather, $windSpeedDirectionVariable, $windDirectionVariable, $visibility;
     /**
      * @var Wind
      */
@@ -162,7 +162,7 @@ class Message
     protected function checkForVisibility($code)
     {
         if (preg_match('#^([0-9]{4})|(([0-9]{1,4})SM)$#', $code, $matches)) {
-            if (isset($matces[3]) && strlen($matches[3]) > 0) {
+            if (isset($matches[3]) && strlen($matches[3]) > 0) {
 
                 $this->setVisibility((float)$matches[3] * 1609.34);
             } else {
