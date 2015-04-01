@@ -291,7 +291,7 @@ class Message
 
     public function getWeather()
     {
-        return $this->weather ? $this->weather : array("CLEAR");
+        return $this->weather;
     }
 
     protected function addRunwayVisualRange($runway, $range)
