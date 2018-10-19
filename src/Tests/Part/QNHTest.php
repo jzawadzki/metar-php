@@ -3,8 +3,9 @@
 namespace METAR\Tests\Part;
 
 use METAR\Part\QNH;
+use PHPUnit\Framework\TestCase;
 
-class QNHTest extends \PHPUnit_Framework_TestCase {
+class QNHTest extends TestCase {
 
     public function testQNHInHpa() {
 

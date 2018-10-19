@@ -4,8 +4,9 @@ namespace METAR\Tests\View;
 
 use METAR\Message;
 use METAR\View\Text;
+use PHPUnit\Framework\TestCase;
 
-class TextTest extends \PHPUnit_Framework_TestCase {
+class TextTest extends TestCase {
 
     public function testFormat() {
 

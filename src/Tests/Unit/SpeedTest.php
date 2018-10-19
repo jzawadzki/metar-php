@@ -2,10 +2,10 @@
 
 namespace METAR\Tests\Part;
 
-use METAR\Part\QNH;
 use METAR\Unit\Speed;
+use PHPUnit\Framework\TestCase;
 
-class SpeedTest extends \PHPUnit_Framework_TestCase {
+class SpeedTest extends TestCase {
 
     public function testConvert() {
 
