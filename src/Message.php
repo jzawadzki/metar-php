@@ -199,12 +199,12 @@ class Message
             return false;
         }
 
-        $range = array('exact' => (float)$matches[2], 'unit' => $matches[5] ? 'FT' : 'M');
+        $range = array('exact' => (float)$matches[2], 'unit' => isset($matches[5]) ? 'FT' : 'M');
         if (isset($matches[3])) {
             $range = Array(
                 'from' => (float)$matches[2],
                 'to'   => (float)$matches[4],
-                'unit' => $matches[5] ? 'FT' : 'M'
+                'unit' => isset($matches[5]) ? 'FT' : 'M'
             );
         }
         $this->addRunwayVisualRange($matches[1], $range);

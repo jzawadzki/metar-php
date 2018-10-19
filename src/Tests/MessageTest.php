@@ -64,4 +64,22 @@ class MessageTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(1009,$metar->getQNH()->toUnit('hPa'));
     }
 
+    public function testUMMS() {
+        $metar = new METAR("UMMS 111900Z 00000MPS 0300 R31/0900 FG FEW001 05/04 Q1032 R31/CLRD// NOSIG RMK QBB050");
+        $this->assertEquals("UMMS", $metar->getLocation());
+        $this->assertEquals(11, $metar->getDayOfMonth());
+        $this->assertEquals("1900",$metar->getZuluTime());
+        $this->assertEquals("000", $metar->getWindDirection());
+        $this->assertEquals(0, $metar->getWindSpeed()->toUnit('m/s'));
+        $this->assertEquals(5, $metar->getTemperature()->toUnit('C'));
+        $this->assertEquals(4, $metar->getDewPoint()->toUnit('C'));
+        $this->assertEquals(300, $metar->getVisibility());
+        $this->assertEquals(Array(
+            Array('type'=>'FEW','level'=>100,'significant'=>''),
+        ),$metar->getCloudCover());
+        $this->assertEquals(Array('exact' => 900, 'unit' => "M"), $metar->getRunwayVisualRange("R31"));
+        $this->assertEquals(1032,$metar->getQNH()->toUnit('hPa'));
+        $this->assertEquals(Array("Fog"), $metar->getWeather());
+    }
+
 }

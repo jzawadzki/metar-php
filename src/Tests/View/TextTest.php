@@ -28,9 +28,6 @@ Speed: 10kt
 Visibility: 8000
 Clouds:
 - BKN at 6000ft
-
-Weather:
-- CLEAR
 TEMPLATE;
 
         $this->assertEquals(str_replace("\r","",trim($template)),str_replace("\r","",trim($view->render())));
