@@ -85,7 +85,7 @@ class Message
         } // skip COR and similar
         $this->setLocation($pieces[$pos]);
         $pos++;
-        $this->setDayOfMonth($pieces[$pos]{0} . $pieces[$pos]{1});
+        $this->setDayOfMonth($pieces[$pos][0] . $pieces[$pos][1]);
         $this->setZuluTime(substr($pieces[$pos], 2, 4));
         $c = count($pieces);
         for ($pos++; $pos < $c; $pos++) {
@@ -117,14 +117,14 @@ class Message
             return false;
         }
         $temp = (float)$matches[1];
-        if ($matches[1]{0} == 'M') {
+        if ($matches[1][0] == 'M') {
             $temp = ((float)substr($matches[1], 1)) * -1;
         }
 
         $this->temperature = new Temperature($temp);
 
         $dew = (float)$matches[2];
-        if ($matches[2]{0} == 'M') {
+        if ($matches[2][0] == 'M') {
             $dew = ((float)substr($matches[2], 1)) * -1;
         }
         $this->dewPoint = new Temperature($dew);
