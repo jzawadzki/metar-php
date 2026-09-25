@@ -8,7 +8,7 @@ class Speed
     /**
      * @var meters per second
      */
-    protected $mps;
+    protected $value;
 
 
     public function __construct($value, $unit = 'kt')
