@@ -4,7 +4,7 @@ namespace METAR\part;
 
 class Temperature
 {
-    protected $celcius;
+    protected $value;
 
     public function __construct($celcius, $unit = 'C')
     {
