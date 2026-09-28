@@ -1,6 +1,6 @@
 <?php
 
-namespace METAR\part;
+namespace METAR\Part;
 
 class Temperature
 {
